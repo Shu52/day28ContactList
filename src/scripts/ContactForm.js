@@ -3,19 +3,27 @@ const $ = require("jquery")
 const contactCollectionModule = require("./ContactCollection")
 const contactListModule = require("./ContactList")
 
-const addNewContact = () => {
+const addNewContact = () => {//add new contact function. gets input values from form, called by event listener
   const newContactName = $(".name-form-field").val()
   const newContactPhone = $(".phone-form-field").val()
   const newContactAddr = $(".addr-form-field").val()
   console.log("add button clicked", newContactName, newContactPhone, newContactAddr);
-  contactCollectionModule.postContact(newContactName, newContactPhone, newContactAddr)
+  contactCollectionModule.postContact(newContactName, newContactPhone, newContactAddr) //post contact to database
   .then((response) => {
     console.log("response", response)
-    contactListModule.buildContactList()
+    contactListModule.buildContactList()//refresh dom
+  })
+}
+const editContact = () => { //edit function
+  const contactId = event.currentTarget.parentNode.id //sets contact id to parent node id
+  ContactCollectionModule.getContact(contactId) //call to contact collection module method
+  .then((response) => {
+    console.log("contact to be edited", response.phone);//shows that response is an object. logging phone property
+    buildContactForm(response) // calls build edit contact form and fills argument in build edit contact form
   })
 }
 
-const contactForm = Object.create({}, {
+const contactForm = Object.create({}, {//creates dom elements, called in main.js
   buildContactForm: {
     value: function() {
       const formArticle = document.createElement("article")
@@ -28,7 +36,7 @@ const contactForm = Object.create({}, {
 
       const nameField = document.createElement("input")
       nameField.setAttribute("type", "text")
-      nameField.className = "name-form-field"
+      nameField.className = "name-form-field name-edit-field"
       nameSection.appendChild(nameField)
 
       formArticle.appendChild(nameSection)
@@ -41,7 +49,7 @@ const contactForm = Object.create({}, {
 
       const phoneField = document.createElement("input")
       phoneField.setAttribute("type", "tel")
-      phoneField.className = "phone-form-field"
+      phoneField.className = "phone-form-field phone-edit-field"
       phoneSection.appendChild(phoneField)
 
       formArticle.appendChild(phoneSection)
@@ -54,13 +62,14 @@ const contactForm = Object.create({}, {
 
       const addrFieldOne = document.createElement("input")
       addrFieldOne.setAttribute("type", "text")
-      addrFieldOne.className = "addr-form-field"
+      addrFieldOne.className = "addr-form-field addr-edit-field"
       addrSection.appendChild(addrFieldOne)
       formArticle.appendChild(addrSection)
 
       const addButton = document.createElement("button")
       addButton.textContent = "Add"
-      addButton.addEventListener("click", addNewContact)
+      addButton.setAttribute("type","submit")
+      addButton.addEventListener("click", addNewContact)//calls above function
       formArticle.appendChild(addButton)
 
       document.querySelector("#display-container").appendChild(formArticle)
@@ -68,4 +77,4 @@ const contactForm = Object.create({}, {
   }
 })
 
-module.exports = contactForm
+module.exports = contactForm, editContact
